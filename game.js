@@ -1,8 +1,15 @@
 let buttonColors = ["red", "blue", "green", "yellow"];
 let gamePattern = [];
 userClickedPattern = [];
+let gameStarted = false;
+let level = 0;
 
 function nextSequence() {
+  // every time we call this, reset the userClickedPattern
+  // to an empty array
+  userClickedPattern = [];
+  level++;
+  $("#level-title").text("Level " + level);
   // generate random number between 0 and 3
   let randomNumber = Math.floor(Math.random() * 4);
   let randomChosenColor = buttonColors[randomNumber];
@@ -21,6 +28,36 @@ function nextSequence() {
   playSound(randomChosenColor);
 }
 
+function checkAnswer(currentLevel) {
+  if (userClickedPattern[currentLevel] === gamePattern[currentLevel]) {
+    // is the sequence finished?
+    if (userClickedPattern.length === gamePattern.length) {
+      // call nextSequence after 1000 ms
+      setTimeout(function () {
+        nextSequence();
+      }, 1000);
+    }
+  } else {
+    // play wrong.mp3
+    playSound("wrong");
+    // apply class game-over to the body and remove after 200ms
+    $("body").addClass("game-over");
+    setTimeout(function () {
+      $("body").removeClass("game-over");
+    }, 200);
+
+    // show game over and startOver() to reset values for a new game
+    $("#level-title").text("Game Over, Press Any Key to Restart");
+    startOver();
+  }
+}
+
+function startOver() {
+  level = 0;
+  gamePattern = [];
+  gameStarted = false;
+}
+
 function playSound(name) {
   var sound = new Audio("sounds/" + name + ".mp3");
   sound.play();
@@ -30,15 +67,18 @@ function animatePress(currentColor) {
   $("#" + currentColor).addClass("pressed");
 
   // remove pressed class after 100 milliseconds
-  setTimeout(function() {
+  setTimeout(function () {
     $("#" + currentColor).removeClass("pressed");
-
   }, 100);
 }
 
-// to test
+// Press a key to start the game
 $(document).keydown(function () {
-  nextSequence();
+  if (!gameStarted) {
+    gameStarted = true;
+    $("#level-title").text("Level 0");
+    nextSequence();
+  }
 });
 
 // detect when any buttons are clicked and trigger handler function
@@ -48,4 +88,5 @@ $(".btn").click(function () {
 
   playSound(userChosenColor);
   animatePress(userChosenColor);
+  checkAnswer(userClickedPattern.length - 1);
 });
