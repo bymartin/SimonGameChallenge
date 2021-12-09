@@ -1,5 +1,6 @@
 let buttonColors = ["red", "blue", "green", "yellow"];
 let gamePattern = [];
+userClickedPattern = [];
 
 function nextSequence() {
     // generate random number between 0 and 3
@@ -23,3 +24,8 @@ $(document).keydown(function() {
     nextSequence();
 });
 
+// detect when any buttons are clicked and trigger handler function
+$(".btn").click(function() {
+    var userChosenColor = $(this).attr("id");
+    userClickedPattern.push(userChosenColor);
+});
